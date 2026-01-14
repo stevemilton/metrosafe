@@ -1,5 +1,6 @@
 import { LONDON_BOUNDS } from '../types';
 import type { NominatimResult } from '../types';
+import { isPostcodeFormat, smartPostcodeLookup } from './postcodes';
 
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org/search';
 const USER_AGENT = 'MetroSafe/1.0 (https://metrosafe.app)';
@@ -14,6 +15,23 @@ export function isInLondon(lat: number, lon: number): boolean {
 }
 
 export async function geocodeLocation(query: string): Promise<NominatimResult | null> {
+  // Try postcodes.io first for postcode-format queries (more precise)
+  if (isPostcodeFormat(query)) {
+    const postcodeResult = await smartPostcodeLookup(query);
+    if (postcodeResult) {
+      // Convert to NominatimResult format for compatibility
+      return {
+        place_id: Date.now(), // Use timestamp as unique ID
+        lat: String(postcodeResult.lat),
+        lon: String(postcodeResult.lon),
+        display_name: postcodeResult.displayName,
+        boundingbox: [], // Not needed for our use case
+        type: 'postcode',
+        class: 'place',
+      };
+    }
+    // Fall through to Nominatim if postcodes.io fails
+  }
   const viewbox = `${LONDON_BOUNDS.minLon},${LONDON_BOUNDS.minLat},${LONDON_BOUNDS.maxLon},${LONDON_BOUNDS.maxLat}`;
   
   const params = new URLSearchParams({
@@ -54,9 +72,25 @@ export async function geocodeLocation(query: string): Promise<NominatimResult | 
 
 export async function searchLocations(query: string): Promise<NominatimResult[]> {
   if (query.length < 3) return [];
-  
+
+  // Try postcodes.io first for postcode-format queries
+  if (isPostcodeFormat(query)) {
+    const postcodeResult = await smartPostcodeLookup(query);
+    if (postcodeResult) {
+      return [{
+        place_id: Date.now(),
+        lat: String(postcodeResult.lat),
+        lon: String(postcodeResult.lon),
+        display_name: postcodeResult.displayName,
+        boundingbox: [],
+        type: 'postcode',
+        class: 'place',
+      }];
+    }
+  }
+
   const viewbox = `${LONDON_BOUNDS.minLon},${LONDON_BOUNDS.minLat},${LONDON_BOUNDS.maxLon},${LONDON_BOUNDS.maxLat}`;
-  
+
   const params = new URLSearchParams({
     q: `${query}, London`,
     format: 'json',
