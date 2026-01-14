@@ -130,86 +130,90 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
       {showDropdown && (query.length >= 3 || (recentSearches && recentSearches.length > 0)) && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 mt-3 rounded-2xl bg-white shadow-2xl border border-[var(--color-border)] overflow-hidden z-50 animate-fade-in"
+          className="absolute top-full left-0 right-0 mt-4 rounded-2xl bg-white shadow-2xl border border-[var(--color-border)] overflow-hidden z-50 animate-fade-in"
         >
           {isSearching && (
-            <div className="px-6 py-5 text-[var(--color-text-muted)] flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-              <span className="font-medium">Searching...</span>
+            <div className="px-8 py-6 text-[var(--color-text-muted)] flex items-center gap-4">
+              <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+              <span className="font-medium text-base">Searching...</span>
             </div>
           )}
 
           {!isSearching && suggestions.length > 0 && (
             <div>
-              <div className="px-6 py-3 text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]/50 flex items-center gap-2">
+              <div className="px-8 py-4 text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]/50 flex items-center gap-3">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
                 Suggestions
               </div>
-              {suggestions.map((result) => (
-                <button
-                  key={result.place_id}
-                  type="button"
-                  onClick={() => handleSelect(result)}
-                  className="w-full px-6 py-4 text-left hover:bg-[var(--color-surface-secondary)] transition-colors flex items-center gap-4 group"
-                >
-                  <span className="w-10 h-10 rounded-xl bg-[var(--color-surface-secondary)] group-hover:bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0 transition-colors">
-                    <svg className="w-5 h-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    </svg>
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <span className="font-semibold text-[var(--color-text)] block truncate">{result.display_name.split(',')[0]}</span>
-                    <span className="text-sm text-[var(--color-text-muted)] block truncate">
-                      {result.display_name.split(',').slice(1, 3).join(',')}
+              <div className="py-2">
+                {suggestions.map((result) => (
+                  <button
+                    key={result.place_id}
+                    type="button"
+                    onClick={() => handleSelect(result)}
+                    className="w-full px-8 py-5 text-left hover:bg-[var(--color-surface-secondary)] transition-colors flex items-center gap-5 group"
+                  >
+                    <span className="w-12 h-12 rounded-xl bg-[var(--color-surface-secondary)] group-hover:bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0 transition-colors">
+                      <svg className="w-6 h-6 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      </svg>
                     </span>
-                  </div>
-                </button>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-[var(--color-text)] text-base block truncate">{result.display_name.split(',')[0]}</span>
+                      <span className="text-sm text-[var(--color-text-muted)] block truncate mt-1">
+                        {result.display_name.split(',').slice(1, 3).join(',')}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
           {!isSearching && query.length < 3 && recentSearches && recentSearches.length > 0 && (
             <div>
-              <div className="px-6 py-3 text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]/50 flex items-center gap-2">
+              <div className="px-8 py-4 text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)] border-b border-[var(--color-border)] bg-[var(--color-surface-secondary)]/50 flex items-center gap-3">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Recent Searches
               </div>
-              {recentSearches.map((search) => (
-                <button
-                  key={search.id}
-                  type="button"
-                  onClick={() => handleRecentSelect(search)}
-                  className="w-full px-6 py-4 text-left hover:bg-[var(--color-surface-secondary)] transition-colors flex items-center justify-between gap-4 group"
-                >
-                  <div className="flex items-center gap-4 min-w-0 flex-1">
-                    <span className="w-10 h-10 rounded-xl bg-[var(--color-surface-secondary)] group-hover:bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0 transition-colors">
-                      <svg className="w-5 h-5 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+              <div className="py-2">
+                {recentSearches.map((search) => (
+                  <button
+                    key={search.id}
+                    type="button"
+                    onClick={() => handleRecentSelect(search)}
+                    className="w-full px-8 py-5 text-left hover:bg-[var(--color-surface-secondary)] transition-colors flex items-center justify-between gap-5 group"
+                  >
+                    <div className="flex items-center gap-5 min-w-0 flex-1">
+                      <span className="w-12 h-12 rounded-xl bg-[var(--color-surface-secondary)] group-hover:bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0 transition-colors">
+                        <svg className="w-6 h-6 text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                      <span className="font-semibold text-[var(--color-text)] text-base truncate">{search.query}</span>
+                    </div>
+                    <span className="text-xs px-4 py-2 rounded-full bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)] shrink-0 font-medium">
+                      {search.crimeCount} incidents
                     </span>
-                    <span className="font-semibold text-[var(--color-text)] truncate">{search.query}</span>
-                  </div>
-                  <span className="text-xs px-3 py-1.5 rounded-full bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)] shrink-0 font-medium">
-                    {search.crimeCount} incidents
-                  </span>
-                </button>
-              ))}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
           {!isSearching && query.length >= 3 && suggestions.length === 0 && (
-            <div className="px-6 py-8 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-secondary)] flex items-center justify-center mx-auto mb-4">
-                <svg className="w-7 h-7 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="px-8 py-10 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-secondary)] flex items-center justify-center mx-auto mb-5">
+                <svg className="w-8 h-8 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                 </svg>
               </div>
-              <p className="text-[var(--color-text-secondary)] font-semibold mb-1">No locations found</p>
+              <p className="text-[var(--color-text-secondary)] font-semibold text-base mb-2">No locations found</p>
               <p className="text-sm text-[var(--color-text-muted)]">Try a different search term</p>
             </div>
           )}
