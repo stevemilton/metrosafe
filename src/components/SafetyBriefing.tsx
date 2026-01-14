@@ -47,12 +47,10 @@ function parseIntoSections(markdown: string): Section[] {
     } else if (currentTitle) {
       currentContent.push(line);
     } else if (!line.startsWith('#') && line.trim()) {
-      // Content before first header
       currentContent.push(line);
     }
   }
 
-  // Add last section
   if (currentTitle && currentContent.length > 0) {
     sections.push({
       title: currentTitle,
@@ -61,7 +59,6 @@ function parseIntoSections(markdown: string): Section[] {
     });
   }
 
-  // If no sections found, create one from the whole content
   if (sections.length === 0 && markdown.trim()) {
     sections.push({
       title: 'Safety Overview',
@@ -101,7 +98,7 @@ function CollapsibleSection({ section, isOpen, onToggle }: { section: Section; i
           <span className="collapsible-title">{section.title}</span>
         </div>
         <svg
-          className={`w-5 h-5 text-[var(--color-text-muted)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-[var(--color-text-muted)] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -152,19 +149,19 @@ export function SafetyBriefing({ briefing, isLoading, onRegenerate }: SafetyBrie
 
   if (isLoading) {
     return (
-      <div className="card p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+      <div className="card p-8 lg:p-10">
+        <div className="flex items-center gap-5 mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center">
+            <div className="w-7 h-7 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-[var(--color-text)]">Generating Safety Briefing</h3>
-            <p className="text-sm text-[var(--color-text-muted)]">AI is analyzing the crime data...</p>
+            <h3 className="text-xl font-semibold text-[var(--color-text)]">Generating Safety Briefing</h3>
+            <p className="text-[var(--color-text-muted)] mt-1">AI is analyzing the crime data...</p>
           </div>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-[var(--color-surface-secondary)] rounded-xl animate-pulse" />
+            <div key={i} className="h-20 bg-[var(--color-surface-secondary)] rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -173,14 +170,14 @@ export function SafetyBriefing({ briefing, isLoading, onRegenerate }: SafetyBrie
 
   if (!briefing) {
     return (
-      <div className="card p-8 text-center">
-        <div className="w-14 h-14 rounded-xl bg-[var(--color-surface-secondary)] flex items-center justify-center mx-auto mb-4">
-          <svg className="w-7 h-7 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="card p-12 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-secondary)] flex items-center justify-center mx-auto mb-6">
+          <svg className="w-8 h-8 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">AI Safety Briefing</h3>
-        <p className="text-[var(--color-text-muted)] text-sm">
+        <h3 className="text-xl font-semibold text-[var(--color-text)] mb-3">AI Safety Briefing</h3>
+        <p className="text-[var(--color-text-muted)] text-lg">
           Search for a location to generate an AI-powered safety analysis
         </p>
       </div>
@@ -196,44 +193,44 @@ export function SafetyBriefing({ briefing, isLoading, onRegenerate }: SafetyBrie
   return (
     <div className="card overflow-hidden">
       {/* Header */}
-      <div className="p-5 sm:p-6 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center">
-              <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="p-6 lg:p-8 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center flex-shrink-0">
+              <svg className="w-7 h-7 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
               </svg>
             </div>
             <div>
-              <div className="flex items-center gap-3">
-                <h3 className="text-lg font-semibold text-[var(--color-text)]">AI Safety Briefing</h3>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h3 className="text-xl font-semibold text-[var(--color-text)]">AI Safety Briefing</h3>
                 <span className={`badge ${riskConfig[riskLevel].class}`}>
                   {riskConfig[riskLevel].label}
                 </span>
               </div>
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="text-[var(--color-text-muted)] mt-1">
                 {sections.length} sections • Powered by Gemini AI
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={collapseAll}
-              className="btn btn-ghost text-sm"
+              className="btn btn-ghost btn-sm"
             >
-              Collapse
+              Collapse All
             </button>
             <button
               onClick={expandAll}
-              className="btn btn-ghost text-sm"
+              className="btn btn-ghost btn-sm"
             >
-              Expand
+              Expand All
             </button>
             {onRegenerate && (
               <button
                 onClick={onRegenerate}
-                className="btn btn-secondary text-sm"
+                className="btn btn-secondary btn-sm"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -243,7 +240,7 @@ export function SafetyBriefing({ briefing, isLoading, onRegenerate }: SafetyBrie
             )}
             <button
               onClick={handleCopy}
-              className="btn btn-primary text-sm"
+              className="btn btn-primary btn-sm"
             >
               {copied ? (
                 <>
@@ -266,8 +263,8 @@ export function SafetyBriefing({ briefing, isLoading, onRegenerate }: SafetyBrie
       </div>
 
       {/* Content */}
-      <div className="p-5 sm:p-6 bg-[var(--color-surface-secondary)]/30">
-        <div className="space-y-2">
+      <div className="p-6 lg:p-8 bg-[var(--color-surface-secondary)]/30">
+        <div className="space-y-3">
           {sections.map((section, index) => (
             <CollapsibleSection
               key={index}
