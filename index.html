@@ -2,12 +2,55 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MetroSafe - Get real-time crime statistics and AI-powered safety insights for any London location" />
-    <meta name="keywords" content="London, crime, safety, police data, UK, statistics" />
-    <meta name="author" content="MetroSafe" />
+
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com;
+      connect-src 'self' https://data.police.uk https://nominatim.openstreetmap.org https://generativelanguage.googleapis.com;
+      frame-src 'none';
+      object-src 'none';
+      base-uri 'self';
+    ">
+
+    <!-- Primary Meta Tags -->
     <title>MetroSafe - London Crime Insights</title>
+    <meta name="title" content="MetroSafe - London Crime Insights" />
+    <meta name="description" content="Get real-time crime statistics and AI-powered safety insights for any London location. Powered by official UK police data." />
+    <meta name="keywords" content="London, crime, safety, police data, UK, statistics, crime map, safety analysis" />
+    <meta name="author" content="MetroSafe" />
+    <meta name="theme-color" content="#6366f1" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MetroSafe - London Crime Insights" />
+    <meta property="og:description" content="Get real-time crime statistics and AI-powered safety insights for any London location. Powered by official UK police data." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:site_name" content="MetroSafe" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MetroSafe - London Crime Insights" />
+    <meta name="twitter:description" content="Get real-time crime statistics and AI-powered safety insights for any London location. Powered by official UK police data." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MetroSafe" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

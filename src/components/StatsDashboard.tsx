@@ -86,10 +86,10 @@ export function StatsDashboard({ summary, isLoading }: StatsDashboardProps) {
                 border: '1px solid var(--color-border)',
                 borderRadius: '8px',
               }}
-              formatter={(value: number, _name: string, props: { payload: { fullName: string } }) => [
-                value.toLocaleString(),
-                props.payload.fullName
-              ]}
+              formatter={(value, _name, props) => {
+                const payload = props.payload as { fullName: string };
+                return [(value as number).toLocaleString(), payload.fullName];
+              }}
             />
             <Bar dataKey="count" radius={[0, 4, 4, 0]}>
               {barData.map((entry, index) => (
