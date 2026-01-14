@@ -6,27 +6,27 @@ import { formatCategoryName } from '../utils/aggregation';
 interface StatsDashboardProps {
   summary: CrimeSummary | null;
   isLoading?: boolean;
+  compact?: boolean;
 }
 
-export function StatsDashboard({ summary, isLoading }: StatsDashboardProps) {
+export function StatsDashboard({ summary, isLoading, compact }: StatsDashboardProps) {
   if (isLoading) {
     return (
-      <div className="card h-full p-8">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-[var(--color-surface-secondary)] flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+      <div className={compact ? "space-y-4" : "card h-full p-8"}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-[var(--color-surface-secondary)] flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
           </div>
           <div>
-            <h3 className="font-semibold text-[var(--color-text)] text-lg">Loading Statistics</h3>
-            <p className="text-sm text-[var(--color-text-muted)]">Analyzing data...</p>
+            <h3 className="font-semibold text-[var(--color-text)] text-sm">Loading Statistics</h3>
+            <p className="text-xs text-[var(--color-text-muted)]">Analyzing data...</p>
           </div>
         </div>
-        <div className="space-y-6 animate-pulse">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-28 bg-[var(--color-surface-secondary)] rounded-xl" />
-            <div className="h-28 bg-[var(--color-surface-secondary)] rounded-xl" />
+        <div className="space-y-4 animate-pulse">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-20 bg-[var(--color-surface-secondary)] rounded-xl" />
+            <div className="h-20 bg-[var(--color-surface-secondary)] rounded-xl" />
           </div>
-          <div className="h-52 bg-[var(--color-surface-secondary)] rounded-xl" />
           <div className="h-40 bg-[var(--color-surface-secondary)] rounded-xl" />
         </div>
       </div>
@@ -35,14 +35,14 @@ export function StatsDashboard({ summary, isLoading }: StatsDashboardProps) {
 
   if (!summary || summary.totalCrimes === 0) {
     return (
-      <div className="card p-10 text-center h-full flex flex-col items-center justify-center">
-        <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-secondary)] flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className={compact ? "empty-state" : "card p-10 text-center h-full flex flex-col items-center justify-center"}>
+        <div className="empty-state-icon">
+          <svg className="w-7 h-7 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
           </svg>
         </div>
-        <h3 className="font-semibold text-[var(--color-text)] text-lg mb-2">Crime Statistics</h3>
-        <p className="text-[var(--color-text-muted)]">
+        <h3 className="empty-state-title">Crime Statistics</h3>
+        <p className="empty-state-description">
           Search for a location to view statistics
         </p>
       </div>
@@ -71,6 +71,104 @@ export function StatsDashboard({ summary, isLoading }: StatsDashboardProps) {
   const topCategory = barData[0];
   const topPercentage = Math.round((topCategory?.count / summary.totalCrimes) * 100);
   const categoryCount = Object.keys(summary.categoryCounts).length;
+
+  // Compact mode for panel
+  if (compact) {
+    return (
+      <div className="space-y-4">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="stat-card">
+            <p className="stat-value gradient-text text-2xl">{summary.totalCrimes.toLocaleString()}</p>
+            <p className="stat-label">Total Incidents</p>
+          </div>
+          <div className="stat-card">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: topCategory?.color }} />
+              <p className="text-xl font-bold" style={{ color: topCategory?.color }}>{topPercentage}%</p>
+            </div>
+            <p className="stat-label truncate text-xs" title={topCategory?.fullName}>{topCategory?.fullName}</p>
+          </div>
+        </div>
+
+        {/* Compact Bar Chart */}
+        <div className="chart-container">
+          <h4 className="chart-title">Top Categories</h4>
+          <ResponsiveContainer width="100%" height={140}>
+            <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 8 }}>
+              <XAxis type="number" hide />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={70}
+                tick={{ fill: 'var(--color-text-secondary)', fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: 'white',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '8px',
+                  boxShadow: 'var(--shadow-md)',
+                  padding: '8px 12px',
+                  fontSize: '12px',
+                }}
+                formatter={(value, _name, props) => {
+                  const payload = props.payload as { fullName: string };
+                  return [(value as number).toLocaleString(), payload.fullName];
+                }}
+                cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+              />
+              <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                {barData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Compact Pie Chart */}
+        <div className="chart-container">
+          <h4 className="chart-title">Distribution</h4>
+          <ResponsiveContainer width="100%" height={160}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                innerRadius={35}
+                outerRadius={55}
+                paddingAngle={2}
+                dataKey="value"
+                stroke="white"
+                strokeWidth={2}
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={index} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  background: 'white',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '8px',
+                  boxShadow: 'var(--shadow-md)',
+                  padding: '8px 12px',
+                  fontSize: '12px',
+                }}
+              />
+              <Legend
+                wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
+                formatter={(value) => <span style={{ color: 'var(--color-text-secondary)' }}>{value}</span>}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card overflow-hidden h-full flex flex-col">

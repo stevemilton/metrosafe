@@ -10,10 +10,11 @@ export interface SearchBarHandle {
 interface SearchBarProps {
   onSearch: (location: NominatimResult) => void;
   isLoading?: boolean;
+  compact?: boolean;
 }
 
 export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
-  function SearchBar({ onSearch, isLoading }, ref) {
+  function SearchBar({ onSearch, isLoading, compact }, ref) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -69,6 +70,118 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
       handleSelect(suggestions[0]);
     }
   };
+
+  // Compact mode for header
+  if (compact) {
+    return (
+      <form onSubmit={handleSubmit} className="relative w-full">
+        <div className="relative">
+          <div className={`
+            relative bg-[var(--color-surface-secondary)] rounded-xl transition-all duration-200
+            ${isFocused ? 'ring-2 ring-[var(--color-primary)]/30' : ''}
+          `}>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg
+                className={`w-4 h-4 transition-colors ${isFocused ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-light)]'}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => {
+                setShowDropdown(true);
+                setIsFocused(true);
+              }}
+              onBlur={() => setIsFocused(false)}
+              placeholder="Search London..."
+              className="w-full pl-9 pr-10 py-2.5 text-sm rounded-xl bg-transparent focus:outline-none placeholder:text-[var(--color-text-light)] text-[var(--color-text)]"
+              disabled={isLoading}
+            />
+            {isLoading && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {showDropdown && (query.length >= 3 || (recentSearches && recentSearches.length > 0)) && (
+          <div
+            ref={dropdownRef}
+            className="absolute top-full left-0 right-0 mt-2 rounded-xl bg-white shadow-xl border border-[var(--color-border)] overflow-hidden z-50 animate-fade-in max-h-80 overflow-y-auto"
+          >
+            {isSearching && (
+              <div className="px-4 py-3 text-[var(--color-text-muted)] flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm">Searching...</span>
+              </div>
+            )}
+
+            {!isSearching && suggestions.length > 0 && (
+              <div className="py-1">
+                {suggestions.map((result) => (
+                  <button
+                    key={result.place_id}
+                    type="button"
+                    onClick={() => handleSelect(result)}
+                    className="w-full px-4 py-3 text-left hover:bg-[var(--color-surface-secondary)] transition-colors flex items-center gap-3"
+                  >
+                    <svg className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-[var(--color-text)] text-sm block truncate">{result.display_name.split(',')[0]}</span>
+                      <span className="text-xs text-[var(--color-text-muted)] block truncate">
+                        {result.display_name.split(',').slice(1, 3).join(',')}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {!isSearching && query.length < 3 && recentSearches && recentSearches.length > 0 && (
+              <div className="py-1">
+                <div className="px-4 py-2 text-xs uppercase tracking-wider font-semibold text-[var(--color-text-muted)]">
+                  Recent
+                </div>
+                {recentSearches.slice(0, 3).map((search) => (
+                  <button
+                    key={search.id}
+                    type="button"
+                    onClick={() => handleRecentSelect(search)}
+                    className="w-full px-4 py-3 text-left hover:bg-[var(--color-surface-secondary)] transition-colors flex items-center gap-3"
+                  >
+                    <svg className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium text-[var(--color-text)] text-sm truncate">{search.query}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {!isSearching && query.length >= 3 && suggestions.length === 0 && (
+              <div className="px-4 py-6 text-center">
+                <p className="text-sm text-[var(--color-text-muted)]">No locations found</p>
+              </div>
+            )}
+          </div>
+        )}
+      </form>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full max-w-2xl">
