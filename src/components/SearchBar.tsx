@@ -80,9 +80,9 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
             relative bg-[var(--color-surface-secondary)] rounded-xl transition-all duration-200
             ${isFocused ? 'ring-2 ring-[var(--color-primary)]/30' : ''}
           `}>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg
-                className={`w-4 h-4 transition-colors ${isFocused ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-light)]'}`}
+                className={`w-5 h-5 transition-colors ${isFocused ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-light)]'}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -105,11 +105,11 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
               }}
               onBlur={() => setIsFocused(false)}
               placeholder="Search London..."
-              className="w-full pl-9 pr-10 py-2.5 text-sm rounded-xl bg-transparent focus:outline-none placeholder:text-[var(--color-text-light)] text-[var(--color-text)]"
+              className="w-full pl-12 pr-10 py-3 text-sm rounded-xl bg-transparent focus:outline-none placeholder:text-[var(--color-text-light)] text-[var(--color-text)]"
               disabled={isLoading}
             />
             {isLoading && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
                 <div className="w-4 h-4 border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)] rounded-full animate-spin" />
               </div>
             )}
