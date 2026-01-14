@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SearchBar } from './components/SearchBar';
+import { SearchBar, type SearchBarHandle } from './components/SearchBar';
 import { CrimeMap } from './components/CrimeMap';
 import { StatsDashboard } from './components/StatsDashboard';
 import { SafetyBriefing } from './components/SafetyBriefing';
 import { Settings } from './components/Settings';
+import { ErrorBoundary, MapErrorFallback, StatsErrorFallback } from './components/ErrorBoundary';
 import { useCrimeData } from './hooks/useCrimeData';
 import { useSafetyBriefing } from './hooks/useSafetyBriefing';
 import { LONDON_BOUNDS } from './types';
@@ -28,6 +29,11 @@ function MetroSafeApp() {
     name: string;
   } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const searchBarRef = useRef<SearchBarHandle>(null);
+
+  const handleQuickSearch = useCallback((area: string) => {
+    searchBarRef.current?.setQuery(area);
+  }, []);
 
   const { crimes, summary, isLoading: isCrimeLoading, progress } = useCrimeData(
     selectedLocation?.lat ?? null,
@@ -39,22 +45,23 @@ function MetroSafeApp() {
     summary
   );
 
-  const handleSearch = async (result: NominatimResult) => {
+  const handleSearch = useCallback(async (result: NominatimResult) => {
     const lat = parseFloat(result.lat);
     const lon = parseFloat(result.lon);
     const name = result.display_name.split(',')[0];
 
     setSelectedLocation({ lat, lon, name });
 
-    setTimeout(async () => {
-      await saveSearch({
-        query: name,
-        location: { lat, lon, displayName: result.display_name },
-        timestamp: Date.now(),
-        crimeCount: 0,
-      });
-    }, 1000);
-  };
+    // Save search history immediately (fire and forget)
+    saveSearch({
+      query: name,
+      location: { lat, lon, displayName: result.display_name },
+      timestamp: Date.now(),
+      crimeCount: 0,
+    }).catch(() => {
+      // Silently ignore save errors - not critical for UX
+    });
+  }, []);
 
   const defaultCenter: [number, number] = [
     (LONDON_BOUNDS.minLat + LONDON_BOUNDS.maxLat) / 2,
@@ -101,7 +108,11 @@ function MetroSafeApp() {
               Get real-time crime statistics and AI-powered safety insights for any London location
             </p>
             <div className="flex justify-center">
-              <SearchBar onSearch={handleSearch} isLoading={isCrimeLoading} />
+              <SearchBar
+                ref={searchBarRef}
+                onSearch={handleSearch}
+                isLoading={isCrimeLoading}
+              />
             </div>
           </section>
 
@@ -110,26 +121,36 @@ function MetroSafeApp() {
             <div className="grid lg:grid-cols-3 gap-6 animate-fade-in">
               {/* Map */}
               <div className="lg:col-span-2 h-[500px]">
-                <CrimeMap
-                  center={mapCenter}
-                  crimes={crimes}
-                  isLoading={isCrimeLoading}
-                  progress={progress}
-                />
+                <ErrorBoundary
+                  fallback={<MapErrorFallback onRetry={() => window.location.reload()} />}
+                >
+                  <CrimeMap
+                    center={mapCenter}
+                    crimes={crimes}
+                    isLoading={isCrimeLoading}
+                    progress={progress}
+                  />
+                </ErrorBoundary>
               </div>
 
               {/* Stats Sidebar */}
               <div className="lg:col-span-1 overflow-auto max-h-[500px]">
-                <StatsDashboard summary={summary} isLoading={isCrimeLoading} />
+                <ErrorBoundary
+                  fallback={<StatsErrorFallback onRetry={() => window.location.reload()} />}
+                >
+                  <StatsDashboard summary={summary} isLoading={isCrimeLoading} />
+                </ErrorBoundary>
               </div>
 
               {/* AI Briefing - Full Width */}
               <div className="lg:col-span-3">
-                <SafetyBriefing
-                  briefing={briefing ?? null}
-                  isLoading={isBriefingLoading}
-                  onRegenerate={() => refetchBriefing()}
-                />
+                <ErrorBoundary>
+                  <SafetyBriefing
+                    briefing={briefing ?? null}
+                    isLoading={isBriefingLoading}
+                    onRegenerate={() => refetchBriefing()}
+                  />
+                </ErrorBoundary>
               </div>
             </div>
           )}
@@ -146,14 +167,7 @@ function MetroSafeApp() {
                 {['Camden Town', 'Shoreditch', 'Westminster', 'Brixton', 'Greenwich'].map((area) => (
                   <button
                     key={area}
-                    onClick={() => {
-                      const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-                      if (input) {
-                        input.value = area;
-                        input.dispatchEvent(new Event('input', { bubbles: true }));
-                        input.focus();
-                      }
-                    }}
+                    onClick={() => handleQuickSearch(area)}
                     className="px-4 py-2 rounded-full glass hover:bg-[var(--color-surface-elevated)] transition-colors text-sm"
                   >
                     {area}
@@ -189,8 +203,10 @@ function MetroSafeApp() {
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <MetroSafeApp />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <MetroSafeApp />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

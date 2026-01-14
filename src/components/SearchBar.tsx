@@ -1,14 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useLocationSearch } from '../hooks/useGeocode';
 import { useRecentSearches } from '../hooks/useSettings';
 import type { NominatimResult, Search } from '../types';
+
+export interface SearchBarHandle {
+  setQuery: (query: string) => void;
+}
 
 interface SearchBarProps {
   onSearch: (location: NominatimResult) => void;
   isLoading?: boolean;
 }
 
-export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
+export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
+  function SearchBar({ onSearch, isLoading }, ref) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -17,6 +22,15 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
 
   const { data: suggestions = [], isLoading: isSearching } = useLocationSearch(debouncedQuery);
   const recentSearches = useRecentSearches(5);
+
+  // Expose setQuery to parent via ref
+  useImperativeHandle(ref, () => ({
+    setQuery: (newQuery: string) => {
+      setQuery(newQuery);
+      setShowDropdown(true);
+      inputRef.current?.focus();
+    },
+  }), []);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query), 300);
@@ -145,4 +159,4 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
       )}
     </form>
   );
-}
+});

@@ -1,5 +1,6 @@
 import type { CrimeSummary } from '../types';
 import { readSettings, ensureSettings } from '../db';
+import { logger } from '../utils/logger';
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
@@ -109,7 +110,7 @@ Your key is stored locally and never shared.`;
     const data = await response.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate briefing.';
   } catch (error) {
-    console.error('Gemini API error:', error);
+    logger.error('Gemini API error:', error);
     return `## Error Generating Briefing
 
 There was an error connecting to the AI service. Please check your API key in Settings and try again.
