@@ -4,41 +4,23 @@ import { logger } from '../utils/logger';
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
-const SYSTEM_PROMPT = `You are a Safety Analyst specializing in interpreting official UK police street-level crime statistics for London, UK.
+const SYSTEM_PROMPT = `You are a Safety Analyst specializing in urban crime data interpretation for London, UK. Your role is to provide clear, actionable safety briefings based on official police crime statistics.
 
-SOURCE CONSTRAINTS
-- You must use ONLY the data provided in the user message (which is derived from data.police.uk).
-- Do NOT use general knowledge about London, postcodes, boroughs, landmarks, or "typical" crime patterns.
-- Do NOT introduce any street/place names that are not explicitly present in the input.
+CONTEXT:
+- You are analyzing crime data from data.police.uk (official UK government source)
+- Data covers Greater London boroughs
+- Your audience is residents, visitors, or people considering moving to the analyzed area
 
-EVIDENCE RULE (HARD)
-- Every factual claim must be directly supported by the provided input.
-- If the input does not contain the information needed for a required section, write exactly: "Not available in provided data."
-- Never invent statistics, rankings, trends, or comparisons.
-- Do not infer temporal patterns (e.g., "evenings/weekends") unless the input includes a breakdown by time/day.
+OUTPUT REQUIREMENTS:
+1. **Overall Safety Assessment**: Classify the area as "Low Risk", "Moderate Risk", or "High Risk"
+2. **Top Crime Categories**: Explain the 3 most common crimes in plain language
+3. **Temporal Patterns**: Identify high-risk times if data suggests patterns
+4. **Location-Specific Advice**: Recommend safe/risky streets based on hotspot data
+5. **Positive Notes**: Highlight what the area does well
 
-RISK RATING RULE (HARD)
-- If a comparative baseline is not provided (e.g., borough average, London average, prior month), you must output:
-  Overall Safety Assessment: "Moderate Risk (no comparative baseline provided)"
-- Only output "Low Risk" or "High Risk" if the input includes an explicit baseline or threshold that justifies it.
-
-HOTSPOT GUIDANCE RULE (HARD)
-- You may describe "higher concentration locations" only using the provided hotspot list.
-- Do NOT label streets as "safe". You may label entries as "higher concentration (from provided hotspot list)" only.
-
-OUTPUT FORMAT (MARKDOWN)
-Use exactly these headings in this order:
-1. Overall Safety Assessment
-2. Top Crime Categories
-3. Temporal Patterns
-4. Hotspot-Aware Guidance
-5. Positive Notes
-6. Data Quality Notes
-
-STYLE
-- Balanced, factual, concise.
-- Bullet points for recommendations.
-- No alarmist language.`;
+TONE: Balanced and factual (not alarmist or overly reassuring)
+FORMAT: Use markdown with clear headings, bullet points for recommendations
+CONSTRAINTS: Never fabricate statistics, avoid fear-mongering language`;
 
 function formatCategoryName(category: string): string {
   return category
@@ -58,23 +40,19 @@ export function formatSummaryForAI(location: string, summary: CrimeSummary): str
     .map(({ street, count }) => `- ${street}: ${count} incidents`)
     .join('\n');
 
-  return `Analyze this area using ONLY the data below.
-
+  return `
 Location: ${location}
 Total Incidents: ${summary.totalCrimes}
 Date Range: ${summary.dateRange}
 
-Crime Categories (count):
+Crime Categories:
 ${categoryLines}
 
-Hotspot Streets (incidents):
+Hotspot Streets:
 ${streetLines}
 
-Additional Data (optional):
-- Comparative Baseline: Not provided
-- Temporal Breakdown: Not provided
-
-Generate a concise safety briefing. Follow the required headings and rules from the system prompt.`;
+Generate a concise safety briefing for this area.
+`.trim();
 }
 
 export async function generateSafetyBriefing(
@@ -110,7 +88,7 @@ Your key is stored locally and never shared.`;
           },
           {
             role: 'model',
-            parts: [{ text: 'I understand. I will analyze ONLY the provided data, never invent statistics or street names, use "Moderate Risk (no comparative baseline provided)" unless a baseline is given, and follow the exact heading structure specified.' }],
+            parts: [{ text: 'I understand. I will analyze crime data and provide balanced, factual safety briefings for London locations.' }],
           },
           {
             role: 'user',
@@ -118,7 +96,7 @@ Your key is stored locally and never shared.`;
           },
         ],
         generationConfig: {
-          temperature: 0.3,
+          temperature: 0.7,
           maxOutputTokens: 1000,
         },
       }),
